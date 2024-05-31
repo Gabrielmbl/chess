@@ -13,6 +13,11 @@ class Piece
       # Implement in subclass
       false
     end
+
+    def possible_moves(start_pos, board)
+      # Implement in subclass
+      []
+    end
   end
   
   class Rook < Piece
@@ -24,6 +29,15 @@ class Piece
       # Rook can move horizontally or vertically any number of squares
       dx, dy = (end_pos[0] - start_pos[0]).abs, (end_pos[1] - start_pos[1]).abs
       (dx.zero? || dy.zero?) && board.clear_path?(start_pos, end_pos)
+    end
+
+    def possible_moves(start_pos, board)
+      moves = []
+      (0..7).each do |i|
+        moves << [start_pos[0], i]
+        moves << [i, start_pos[1]]
+      end
+      moves.select { |end_pos| valid_move?(start_pos, end_pos, board) }
     end
   end
   
@@ -37,6 +51,17 @@ class Piece
       dx, dy = (end_pos[0] - start_pos[0]).abs, (end_pos[1] - start_pos[1]).abs
       (dx == 2 && dy == 1) || (dx == 1 && dy == 2)
     end
+
+    def possible_moves(start_pos, board)
+      moves = []
+      move_offsets = [[-2, -1], [-1, -2], [1, -2], [2, -1], [2, 1], [1, 2], [-1, 2], [-2, 1]]
+      move_offsets.each do |dx, dy|
+        end_pos = [start_pos[0] + dx, start_pos[1] + dy]
+        moves << end_pos if (0..7).include?(end_pos[0]) && (0..7).include?(end_pos[1]) && valid_move?(start_pos, end_pos, board)
+      end
+      moves
+    end
+
   end
   
   class Bishop < Piece
@@ -48,6 +73,18 @@ class Piece
       # Bishop moves diagonally any number of squares
       (end_pos[0] - start_pos[0]).abs == (end_pos[1] - start_pos[1]).abs && board.clear_path?(start_pos, end_pos)
     end
+
+    def possible_moves(start_pos, board)
+      moves = []
+      (1..7).each do |i|
+        moves << [start_pos[0] + i, start_pos[1] + i]
+        moves << [start_pos[0] - i, start_pos[1] - i]
+        moves << [start_pos[0] + i, start_pos[1] - i]
+        moves << [start_pos[0] - i, start_pos[1] + i]
+      end
+      moves.select { |end_pos| (0..7).include?(end_pos[0]) && (0..7).include?(end_pos[1]) && valid_move?(start_pos, end_pos, board) }
+    end
+
   end
   
   class Queen < Piece
@@ -60,6 +97,20 @@ class Piece
       dx, dy = (end_pos[0] - start_pos[0]).abs, (end_pos[1] - start_pos[1]).abs
       (dx.zero? || dy.zero? || dx == dy) && board.clear_path?(start_pos, end_pos)
     end
+
+    def possible_moves(start_pos, board)
+      moves = []
+      (0..7).each do |i|
+        moves << [start_pos[0], i]
+        moves << [i, start_pos[1]]
+        moves << [start_pos[0] + i, start_pos[1] + i]
+        moves << [start_pos[0] - i, start_pos[1] - i]
+        moves << [start_pos[0] + i, start_pos[1] - i]
+        moves << [start_pos[0] - i, start_pos[1] + i]
+      end
+      moves.select { |end_pos| (0..7).include?(end_pos[0]) && (0..7).include?(end_pos[1]) && valid_move?(start_pos, end_pos, board) }
+    end
+
   end
   
   class King < Piece
@@ -70,6 +121,16 @@ class Piece
     def valid_move?(start_pos, end_pos, _board)
       # King can move one square in any direction
       (end_pos[0] - start_pos[0]).abs <= 1 && (end_pos[1] - start_pos[1]).abs <= 1
+    end
+
+    def possible_moves(start_pos, board)
+      moves = []
+      move_offsets = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+      move_offsets.each do |dx, dy|
+        end_pos = [start_pos[0] + dx, start_pos[1] + dy]
+        moves << end_pos if (0..7).include?(end_pos[0]) && (0..7).include?(end_pos[1]) && valid_move?(start_pos, end_pos, board)
+      end
+      moves
     end
   end
   
@@ -89,6 +150,23 @@ class Piece
       end
       true
     end
+
+    def possible_moves(start_pos, board)
+      moves = []
+      direction = @color == :white ? -1 : 1
+      one_step = [start_pos[0] + direction, start_pos[1]]
+      two_step = [start_pos[0] + (2 * direction), start_pos[1]]
+      diagonal_left = [start_pos[0] + direction, start_pos[1] - 1]
+      diagonal_right = [start_pos[0] + direction, start_pos[1] + 1]
+  
+      moves << one_step if valid_move?(start_pos, one_step, board)
+      moves << two_step if (start_pos[0] == 6 || start_pos[0] == 1) && valid_move?(start_pos, two_step, board)
+      moves << diagonal_left if valid_move?(start_pos, diagonal_left, board)
+      moves << diagonal_right if valid_move?(start_pos, diagonal_right, board)
+  
+      moves.select { |end_pos| (0..7).include?(end_pos[0]) && (0..7).include?(end_pos[1]) }
+    end
+    
   end
 
 
