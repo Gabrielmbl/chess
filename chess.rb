@@ -128,7 +128,7 @@ class ChessBoard
     in_check
   end
 
-  def make_move(move)
+  def make_move(move, current_player)
     start_pos, end_pos = parse_move(move)
     return false if start_pos.nil? || end_pos.nil?
 
@@ -177,6 +177,7 @@ class ChessBoard
 end
 
 
+
 class Player
   attr_reader :color
 
@@ -217,17 +218,17 @@ class ChessGame
     loop do
       puts "\nCurrent board:"
       @board.display
-      if @board.checkmate?(current_player.color)
-        puts "Checkmate! #{current_player.color.capitalize} loses."
+      if @board.checkmate?(@current_player.color)
+        puts "Checkmate! #{@current_player.color.capitalize} loses."
         break
-      elsif @board.in_check?(current_player.color)
-        puts "Check! #{current_player.color.capitalize} is in check."
+      elsif @board.in_check?(@current_player.color)
+        puts "Check! #{@current_player.color.capitalize} is in check."
       end
-      puts "\n#{current_player.color.capitalize}'s turn (enter move in format 'e2 e4' or 'save' to save game):"
-      move = current_player.get_move
+      puts "\n#{@current_player.color.capitalize}'s turn (enter move in format 'e2 e4' or 'save' to save game):"
+      move = @current_player.get_move
       break if move.downcase == 'save'
 
-      if @board.make_move(move)
+      if @board.make_move(move, @current_player)
         # Promote pawn if it reaches the end
         @board.promote_pawn(@board.parse_move(move).last)
         switch_players
@@ -244,3 +245,4 @@ end
 
 game = ChessGame.new
 game.play
+
